@@ -2,7 +2,7 @@ const Services = require('./Services.js')
 
 class SkuServicoes extends Services{
     constructor(){
-        super('ProdutosSku')
+        super('produtosku')
     }
 }
 
