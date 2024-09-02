@@ -1,9 +1,9 @@
 const Services = require('./Services.js')
 
-class ProdutosServices extends Services{
+class MarkupServices extends Services{
     constructor(){
         super('MarkupParam')
     }
 }
 
-module.exports = ProdutosServices
+module.exports = MarkupServices
