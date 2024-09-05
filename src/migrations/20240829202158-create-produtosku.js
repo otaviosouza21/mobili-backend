@@ -12,6 +12,9 @@ module.exports = {
       codigo_sku: {
         type: Sequelize.STRING
       },
+      descricao_sku:{
+        type: Sequelize.STRING
+      },
       custo_sku: {
         type: Sequelize.FLOAT
       },

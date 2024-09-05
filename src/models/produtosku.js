@@ -16,6 +16,7 @@ module.exports = (sequelize, DataTypes) => {
   produtosku.init({
     codigo_sku: DataTypes.STRING,
     custo_sku: DataTypes.FLOAT,
+    descricao_sku: DataTypes.STRING,
     preco_tab1_sku: DataTypes.FLOAT,
     preco_tab2_sku: DataTypes.FLOAT,
     preco_tab3_sku: DataTypes.FLOAT
