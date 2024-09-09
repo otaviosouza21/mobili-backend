@@ -9,6 +9,11 @@ class PedidosController extends Controller {
         super(pedidosServices)
     }
 
+    async receberPedidos(req,res) {
+        const data = req.body
+        console.log(data);
+    }
+
 }
 
 module.exports = PedidosController

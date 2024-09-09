@@ -5,19 +5,6 @@ const pedidosController = new PedidosController();
 
 const route = Router();
 
-route.get("/api/pedidos", (req, res) => {
-  return res.json([
-    {
-      codigo: "01.0089",
-      produto: "PNEU",
-      custo: 400,
-    },
-    {
-      codigo: "01.0100",
-      produto: "QUADRO",
-      custo: 200,
-    },
-  ]);
-});
+route.get("/api/pedidos", (req, res) => {pedidosController.receberPedidos(req,res)});
 
 module.exports = route;
