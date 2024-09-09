@@ -5,6 +5,6 @@ const pedidosController = new PedidosController();
 
 const route = Router();
 
-route.get("/api/pedidos", (req, res) => {pedidosController.receberPedidos(req,res)});
+route.post("/api/pedidos", (req, res) => {pedidosController.receberPedidos(req,res)});
 
 module.exports = route;
