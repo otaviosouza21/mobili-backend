@@ -7,23 +7,35 @@ const pedidosServices = new PedidosServices()
 class PedidosController extends Controller {
     constructor(){
         super(pedidosServices)
+        this.pedidos = []
     }
+
+
+    async getPedidos(req,res){
+        try{
+            if(this.pedidos === null) {
+                return res.status(400).json({ message: `Não há nenhum pedido`});
+            }
+
+            return res.status(200).json(this.pedidos);
+        } catch(error){
+            return res.status(500).json({ message: `${error.message}`});
+            
+        }
+    }
+
 
     async receberPedidos(req,res) {
         const data = req.body
+
         try{
-            if(data === null || !data.dados || !data.dados.numero) {
+            if(data === null) {
                 return res.status(400).json({ message: `Não foi possivel obter dados`});
             }
 
-            notifier.notify({
-                title: 'Novo Pedido Mercos',
-                message: `Número do Pedido: ${data.dados.numero}`,
-                sound: true, // Pode ser ajustado conforme necessário
-                wait: true, // Espera até o usuário interagir com a notificação
-            })
+            this.pedidos = [...this.pedidos,data]
 
-            return res.status(200).json({ message: `Pedido recepcionado ${data.dados.numero}`, data: data.dados});
+            return res.status(200).json(this.pedidos);
         } catch(error){
             return res.status(500).json({ message: `${error.message}`});
             
