@@ -5,6 +5,22 @@ class Controller{
         this.propsServices = propsServices;
     }
 
+   //cria novo
+    async criaNovo(req, res) {
+      const dadosParaCriacao = req.body;
+      
+      try {
+        const novoRegistroCriado = await this.propsServices.criaRegistro(
+          dadosParaCriacao
+        );
+        return res
+          .status(200)
+          .json({ mensagem: 'Registro Criado', novoRegistroCriado });
+      } catch (error) {
+        return res.status(400).json({mensagem:'Registro não criado', erro: error})
+      }
+    }
+
     //===Pega todos os registros
 
     async pegasTodosController(req,res){

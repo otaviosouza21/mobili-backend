@@ -1,6 +1,7 @@
 const Controller = require('./Controller.js')
 const PedidosServices = require('../services/PedidosServices.js')
 const notifier = require('node-notifier'); 
+const { createInflateRaw } = require('zlib');
 
 const pedidosServices = new PedidosServices()
 
@@ -10,13 +11,12 @@ class PedidosController extends Controller {
         this.pedidos = []
     }
 
-
     async getPedidos(req,res){
         try{
             if(this.pedidos === null) {
                 return res.status(400).json({ message: `Não há nenhum pedido`});
             }
-
+            
             return res.status(200).json(this.pedidos);
         } catch(error){
             return res.status(500).json({ message: `${error.message}`});
@@ -33,6 +33,9 @@ class PedidosController extends Controller {
                 return res.status(400).json({ message: `Não foi possivel obter dados`});
             }
 
+           
+            this.criaNovo(req,res)
+            
             this.pedidos = [...this.pedidos,data]
 
             return res.status(200).json(this.pedidos);
