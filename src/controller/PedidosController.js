@@ -11,19 +11,7 @@ class PedidosController extends Controller {
         this.pedidos = []
     }
 
-    async getPedidos(req,res){
-        try{
-            if(this.pedidos === null) {
-                return res.status(400).json({ message: `Não há nenhum pedido`});
-            }
-            
-            return res.status(200).json(this.pedidos);
-        } catch(error){
-            return res.status(500).json({ message: `${error.message}`});
-            
-        }
-    }
-
+  
 
     async receberPedidos(req,res) {
         const data = req.body
