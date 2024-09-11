@@ -33,8 +33,7 @@ class PedidosController extends Controller {
                 return res.status(400).json({ message: `Não foi possivel obter dados`});
             }
 
-           
-            this.criaNovo(req,res)
+           this.propsServices.criaRegistro(data.dados)
             
             this.pedidos = [...this.pedidos,data]
 

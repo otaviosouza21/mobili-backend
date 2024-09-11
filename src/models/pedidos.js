@@ -21,9 +21,9 @@ module.exports = (sequelize, DataTypes) => {
       primaryKey: true, // Definir como chave primária
     },
     total: DataTypes.FLOAT,
-    pedido: DataTypes.INTEGER,
+    numero: DataTypes.INTEGER,
     cliente_razao_social: DataTypes.STRING,
-    emissao: DataTypes.DATE
+    data_emissao: DataTypes.DATE
   }, {
     sequelize,
      modelName: 'Pedidos',

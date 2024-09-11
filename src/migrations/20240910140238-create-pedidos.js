@@ -12,13 +12,13 @@ module.exports = {
       total: {
         type: Sequelize.FLOAT
       },
-      pedido:{
+      numero:{
         type: Sequelize.INTEGER
       },
       cliente_razao_social: {
         type: Sequelize.STRING
       },
-      emissao: {
+      data_emissao: {
         type: Sequelize.DATE
       },
       createdAt: {
