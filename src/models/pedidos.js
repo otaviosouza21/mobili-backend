@@ -23,6 +23,13 @@ module.exports = (sequelize, DataTypes) => {
     total: DataTypes.FLOAT,
     numero: DataTypes.INTEGER,
     cliente_razao_social: DataTypes.STRING,
+    cliente_rua: DataTypes.STRING,
+    cliente_numero: DataTypes.STRING,
+    cliente_bairro: DataTypes.STRING,
+    cliente_cidade: DataTypes.STRING,
+    cliente_estado: DataTypes.STRING,
+    cliente_cep: DataTypes.STRING,
+    condicao_pagamento: DataTypes.STRING,
     data_emissao: DataTypes.DATE
   }, {
     sequelize,

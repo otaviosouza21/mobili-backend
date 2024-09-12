@@ -18,8 +18,29 @@ module.exports = {
       cliente_razao_social: {
         type: Sequelize.STRING
       },
+      cliente_rua:{
+        type: Sequelize.STRING
+      },
+      cliente_numero:{
+        type: Sequelize.STRING
+      },
+      cliente_bairro:{
+        type: Sequelize.STRING
+      },
+      cliente_cidade:{
+        type: Sequelize.STRING
+      },
+      cliente_estado:{
+        type: Sequelize.STRING
+      },
+      cliente_cep:{
+        type: Sequelize.STRING
+      },
       data_emissao: {
         type: Sequelize.DATE
+      },
+      condicao_pagamento:{
+        type: Sequelize.STRING
       },
       createdAt: {
         allowNull: false,
