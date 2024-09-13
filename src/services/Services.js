@@ -10,6 +10,14 @@ class Services {
     return model[this.nomeModel].create(dadosDoRegistro);
 }
 
+  async criaVariosRegistros(registros,dadosParaAtualizar){
+   
+    
+      return model[this.nomeModel].bulkCreate(registros,{
+        updateOnDuplicate: dadosParaAtualizar
+      })
+  }
+
   /*READ*/
   async pegaTodosRegistros() {
     console.log(model[this.nomeModel]);
