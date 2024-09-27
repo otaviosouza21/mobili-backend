@@ -30,7 +30,8 @@ module.exports = (sequelize, DataTypes) => {
     cliente_estado: DataTypes.STRING,
     cliente_cep: DataTypes.STRING,
     condicao_pagamento: DataTypes.STRING,
-    data_emissao: DataTypes.DATE
+    data_emissao: DataTypes.DATE,
+    tipo_pedido_id: DataTypes.INTEGER
   }, {
     sequelize,
      modelName: 'Pedidos',
