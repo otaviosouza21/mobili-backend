@@ -1,4 +1,4 @@
-const Services = require('./Services.js')
+const Services = require('../../Services.js')
 
 class MarkupServices extends Services{
     constructor(){

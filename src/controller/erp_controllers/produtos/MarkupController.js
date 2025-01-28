@@ -1,5 +1,5 @@
-const Controller = require('./Controller.js')
-const MarkupServices = require('../services/MarkupServices.js')
+const Controller = require('../../Controller.js')
+const MarkupServices = require('../../../services/erp_services/produtos/MarkupServices.js')
 
 const markupServices = new MarkupServices()
 

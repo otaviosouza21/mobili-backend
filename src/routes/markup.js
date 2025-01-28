@@ -1,5 +1,5 @@
 const { Router } = require("express");
-const MarkupController = require("../controller/MarkupController");
+const MarkupController = require("../controller/erp_controllers/produtos/MarkupController");
 
 const markupController = new MarkupController();
 

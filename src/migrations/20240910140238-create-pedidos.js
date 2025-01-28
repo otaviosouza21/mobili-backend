@@ -42,6 +42,9 @@ module.exports = {
       condicao_pagamento:{
         type: Sequelize.STRING
       },
+      tipo_pedido_id:{
+        type: Sequelize.INTEGER
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
