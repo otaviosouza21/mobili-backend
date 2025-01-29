@@ -6,7 +6,8 @@ module.exports = (sequelize, DataTypes) => {
       // Verifique se o modelo ProdutoPedido está correto
       Pedidos.hasMany(models.ProdutoPedido, {
         foreignKey: "pedido_id",
-        onDelete: 'CASCADE'
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
       });
     }
   }

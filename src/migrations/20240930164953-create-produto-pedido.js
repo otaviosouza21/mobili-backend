@@ -1,4 +1,7 @@
 'use strict';
+
+const { sequelize } = require('../models');
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -18,10 +21,18 @@ module.exports = {
         references:{
           model: 'pedidos',
           key: 'id'
-        }
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'
+      },
+      produto_codigo:{
+        type: Sequelize.STRING
       },
       preco_tabela:{
         type: Sequelize.FLOAT
+      },
+      tabela_preco_id:{
+        type: Sequelize.INTEGER
       },
       preco_liquido:{
         type: Sequelize.FLOAT
@@ -29,8 +40,11 @@ module.exports = {
       quantidade: {
         type: Sequelize.INTEGER
       },
-      descricao_produto: {
+      produto_nome: {
         type: Sequelize.STRING
+      },
+      st: {
+        type: Sequelize.FLOAT
       },
       createdAt: {
         allowNull: false,

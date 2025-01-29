@@ -6,7 +6,9 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // Corrigir o nome da classe no belongsTo
       ProdutoPedido.belongsTo(models.Pedidos, {
-        foreignKey: 'pedido_id' // Certifique-se de que o campo foreignKey está correto
+        foreignKey: 'pedido_id',
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE'// Certifique-se de que o campo foreignKey está correto
       });
     }
   }
@@ -15,10 +17,13 @@ module.exports = (sequelize, DataTypes) => {
     {
       produto_id: DataTypes.INTEGER,
       pedido_id: DataTypes.INTEGER,
+      produto_codigo: DataTypes.STRING,
+      tabela_preco_id: DataTypes.INTEGER,
       preco_tabela: DataTypes.FLOAT,
       preco_liquido: DataTypes.FLOAT,
       quantidade: DataTypes.INTEGER,
-      descricao_produto: DataTypes.STRING
+      produto_nome: DataTypes.STRING,
+      st: DataTypes.FLOAT
     },
     {
       sequelize,

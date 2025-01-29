@@ -4,6 +4,7 @@ const pedidos = require('./pedidos.js')
 const markup = require('./markup.js')
 const bodyParser = require('body-parser');
 const produtoPedido = require('./produtoPedido.js')
+const usuarioEmpresa = require('./usuario.js')
 
 module.exports = (app) =>{
     app.use(cors());
@@ -12,6 +13,7 @@ module.exports = (app) =>{
     app.use(pedidos)
     app.use(markup)
     app.use(produtoPedido)
+    app.use(usuarioEmpresa)
     
 }
 

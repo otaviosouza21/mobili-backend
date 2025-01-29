@@ -8,5 +8,6 @@ const route = Router();
 route.post("/api/webhook", (req, res) => {pedidosController.receberPedidos(req,res)});
 route.post("/api/produtos-pedidos", (req, res) => {pedidosController.criaNovo(req,res)});
 route.get("/api/pedidos", (req, res) => {pedidosController.pegasTodosController(req,res)});
+route.put("/api/pedidos", (req, res) => {pedidosController.atulizaDadoController(req,res)});
 
 module.exports = route;
