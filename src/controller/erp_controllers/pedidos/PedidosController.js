@@ -5,6 +5,7 @@ const notifier = require('node-notifier');
 const { createInflateRaw } = require('zlib');
 const { sequelize } = require('../../../models/index.js');
 const { log } = require('console');
+const sendEmail = require('../../../middleware/sendEmail.js');
 
 const pedidosServices = new PedidosServices() 
 const produtosPedidosController = new ProdutoPedidosController()
@@ -42,7 +43,6 @@ class PedidosController extends Controller {
                 pedido_id: novoPedido.id
             }))
 
-           
 
             const novoProdutoPedido = await this.produtoPedidosController.CriarProdutosPedidos(
                 produtosComVinculo,
@@ -52,12 +52,15 @@ class PedidosController extends Controller {
             
              this.pedidos = [...this.pedidos,data]
 
+            
+
             return res.status(200).json(this.pedidos);
         } catch(error){
             return res.status(500).json({ message: `${error.message}`});
             
         }
     }
+
 
 }
 

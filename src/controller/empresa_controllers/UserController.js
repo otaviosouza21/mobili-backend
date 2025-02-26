@@ -31,7 +31,7 @@ class UserController extends Controller {
       
       if(UsersEmpresa.status){
         return res.status(422).json({
-            message: "Este cadastro já existe! Tente outro email"
+            message: "Este cadastro já existe! Tente outro email",
             error: true
         })
       }
