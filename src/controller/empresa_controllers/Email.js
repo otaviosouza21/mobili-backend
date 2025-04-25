@@ -11,23 +11,20 @@ class EmailControler extends Controller {
 
   async sendEmailPedidos(req, res) {
     try {
-      const response = await fetch("http://localhost:3333/api/pedidos");
+      const response = await fetch(process.env.URL_API + `/pedidos`);
 
       if (!response.ok) throw new Error("Não foi possível buscar pedidos");
-
       const pedidos = await response.json();
 
       const now = new Date();
-
       const data12hAnterior = new Date(now);
+
       data12hAnterior.setDate(now.getDate() - 1);
       data12hAnterior.setHours(12, 0, 0, 0)
 
       // Ajustando para o horário local (no caso UTC-3 para Brasil)
-        const offset = now.getTimezoneOffset() / 60; // Obtém a diferença do fuso horário em horas
-        data12hAnterior.setHours(data12hAnterior.getHours() - offset); // Ajusta para o horário local
-
-      console.log("Data e hora de referência:", data12hAnterior);
+      const offset = now.getTimezoneOffset() / 60; // Obtém a diferença do fuso horário em horas
+      data12hAnterior.setHours(data12hAnterior.getHours() - offset); // Ajusta para o horário local
 
       const pedidosHtml = pedidos
         .filter((pedido) => {
@@ -39,7 +36,6 @@ class EmailControler extends Controller {
           // Converte a data para um formato legível
           const dataEmissao = new Date(pedido.createdAt);
           const dataFormatada = dataEmissao.toLocaleDateString("pt-BR");
-
           return `
             <tr>
               <td style="border: 1px solid #ddd; padding: 8px;">${dataFormatada}</td>
@@ -66,11 +62,11 @@ class EmailControler extends Controller {
 
       const mailOptions = {
         from: process.env.SMTP_EMAIL,
-        to: "otaviosouzalu@gmail.com",
-        subject: "Lista de Pedidos",
+        to: "sistema@amaisciclo.com.br,comercial2@amaisciclo.com.br,comercial@amaisciclo.com.br",
+        subject: "Relatorios diarios Lista de Pedidos",
         html: `
           <h3>Lista de Pedidos</h3>
-          <p>Segue abaixo a tabela com os pedidos mais recentes</p>
+          <p>Segue abaixo a tabela com os pedidos nas ultimas 24h</p>
           <table style="width: 100%; border-collapse: collapse;">
             <thead>
               <tr>
@@ -99,15 +95,12 @@ class EmailControler extends Controller {
   }
 
   async SendEmailTimer() {
-    cron.schedule("00 17 * * *", async () => {
+    cron.schedule("15 14 * * *", async () => {
       try {
         console.log("Iniciando o envio automatico de email...");
 
-        const response = await fetch(
-          "http://localhost:3333/api/send-email-pedidos",
-          {
-            method: "POST",
-          }
+        const response = await fetch(process.env.URL_API + `/send-email-pedidos`,
+          { method: "POST"}
         );
 
         if (!response.ok) throw new Error("Erro ao enviar email");
