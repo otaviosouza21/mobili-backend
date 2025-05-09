@@ -15,8 +15,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Embalagens",
-      tableName:'embalagens'
+      modelName: "Embalagem",  // <-- singular e capitalizado
+      tableName: 'embalagens',
     }
   );
 
