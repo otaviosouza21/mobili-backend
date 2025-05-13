@@ -1,11 +1,16 @@
 require("dotenv").config();
-const { Console } = require("console");
+const Controller = require("../Controller");
 const db = require("../../models");
 const { dateNowConvert } = require("../../routes/functions/dateNowConvert");
+const TinyServices = require("../../services/tiny_services/TinyServices");
 const Embalagem = db.Embalagem;
 
-class TinyController {
+const tinyServices = new TinyServices();
+
+class TinyController extends Controller {
   constructor() {
+    super();
+    this.tinyServices = tinyServices;
     this.API_TINY_URL = "https://api.tiny.com.br/api2";
     this.API_TINT_URL_V3 = "https://api.tiny.com.br/public-api/v3";
     this.AUTH_URL =
@@ -372,8 +377,8 @@ class TinyController {
       }
 
       // Aqui você salva o access_token no banco, ou em memória, ou no arquivo .env
-      // Por agora, vamos só exibir para teste:
-      console.log("Access Token Recebido:", data.access_token);
+
+      this.criaRegistroToken(data);
 
       return res
         .status(200)
@@ -383,18 +388,50 @@ class TinyController {
     }
   }
 
-  async refreshAccessToken() {
-    const params = new URLSearchParams();
-    params.append("grant_type", "refresh_token");
-    params.append("refresh_token", process.env.TINY_REFRESH_TOKEN);
-    params.append("client_id", this.clientID);
-    params.append("client_secret", this.secret);
-
+  async criaRegistroToken(data) {
     try {
+      const tokenExistente = await this.tinyServices.pegaUltimoToken();
+      console.log(tokenExistente);
+      if (tokenExistente) {
+        // Atualiza o registro existente
+        await tokenExistente.update({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+          expires_in: data.expires_in,
+          token_type: data.token_type,
+        });
+        return tokenExistente;
+      } else {
+        // Cria novo registro
+        const token = await this.tinyServices.criaRegistro(data);
+        return token;
+      }
+    } catch (error) {
+      console.error("Erro ao criar ou atualizar token:", error.message);
+      return null;
+    }
+  }
+
+  async refreshAccessToken() {
+    try {
+      const tokenRegistro = await this.tinyServices.pegaUltimoToken();
+
+      if (!tokenRegistro) {
+        throw new Error("Nenhum token encontrado no banco de dados.");
+      }
+
+      const refreshToken = tokenRegistro.refresh_token;
+
+      const params = new URLSearchParams();
+      params.append("grant_type", "refresh_token");
+      params.append("refresh_token", refreshToken);
+      params.append("client_id", this.clientID);
+      params.append("client_secret", this.secret);
+
       const response = await fetch(this.TOKEN_URL, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: params,
+        body: params.toString(),
       });
 
       const data = await response.json();
@@ -405,12 +442,12 @@ class TinyController {
         );
       }
 
+      // Atualiza o token no banco
+      await this.tinyServices.criaRegistro(data);
+
       this.acessToken = data.access_token;
 
-      // Se quiser salvar novo refresh_token no .env ou DB, atualize aqui:
-      // process.env.TINY_REFRESH_TOKEN = data.refresh_token;
-
-      console.log("Novo token acessado com sucesso.");
+      console.log("Novo access token atualizado com sucesso.");
       return data.access_token;
     } catch (error) {
       console.error("Erro ao atualizar o token:", error.message);
