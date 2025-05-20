@@ -21,7 +21,6 @@ class TinyController extends Controller {
     this.clientID = process.env.TINY_CLIENT_ID;
     this.secret = process.env.TINY_SECRET;
     this.redirectUri = process.env.TINY_REDIRECT_URI;
-    this.acessToken = process.env.TINY_ACESS_TOKEN;
   }
 
   async pegaProdutosServicos(req, res) {
@@ -140,103 +139,57 @@ class TinyController extends Controller {
     if (!id) {
       return res
         .status(400)
-        .json({ message: "Não foi possível obter o ID da nota fiscal." });
+        .json({ message: "ID da nota fiscal não informado." });
     }
 
     const nfeCompleta = await this.pegaNFPorId(id);
-
-    if (!nfeCompleta) {
-      return res
-        .status(400)
-        .json({ message: "Não foi possível obter a nota fiscal." });
-    }
+    if (!nfeCompleta)
+      return res.status(400).json({ message: "Falha ao obter a nota fiscal." });
 
     const idPedido = nfeCompleta?.retorno?.nota_fiscal?.id_venda;
-
     const pedidoDaNfe = await this.pegaPedidoPorId(idPedido);
 
-    if (pedidoDaNfe?.retorno.status !== "OK") {
-      return res.status(400).json({
-        message: "Não foi possível obter o pedido relacionado a NFE.",
-      });
-    }
+    if (!pedidoDaNfe?.retorno?.pedido)
+      return res.status(400).json({ message: "Pedido não encontrado." });
 
-    const itens = pedidoDaNfe?.retorno?.pedido?.itens;
+    const itens = pedidoDaNfe.retorno.pedido.itens;
+    const id_produto = itens?.[0]?.item?.id_produto;
 
-    if (!Array.isArray(itens) || itens.length === 0) {
-      return res.status(400).json({ message: "a NFE não possui itens." });
-    }
-
-    const id_produto = itens[0]?.item?.id_produto;
-
-    if (!id_produto) {
+    if (!id_produto)
       return res.status(400).json({ message: "ID do produto não encontrado." });
-    }
 
     const produtoCompleto = await this.pegaProdutoPorId(id_produto);
-
-    if (!produtoCompleto) {
-      return res
-        .status(400)
-        .json({ message: "Não foi possível obter os dados do produto." });
-    }
-
     const { comprimentoEmbalagem, larguraEmbalagem } =
-      produtoCompleto.retorno.produto;
+      produtoCompleto?.retorno?.produto || {};
 
-    if (!comprimentoEmbalagem || !larguraEmbalagem) {
-      return res
-        .status(400)
-        .json({ message: "Não foi possivel buscar dimensões" });
-    }
+    if (!comprimentoEmbalagem || !larguraEmbalagem)
+      return res.status(400).json({ message: "Dimensões não encontradas." });
 
     const idEmbalagem = await this.buscaIdEmbalagemProduto({
       comprimentoEmbalagem,
       larguraEmbalagem,
     });
-
-    if (!idEmbalagem) {
+    if (!idEmbalagem)
       return res
         .status(400)
-        .json({ message: "Não foi possivel buscar id da embalagem" });
-    }
+        .json({ message: "ID da embalagem não encontrado." });
 
     await this.AtualizaEstoquePorId(idEmbalagem, pedidoDaNfe);
-
     return res.status(200).json({ status: true, data: produtoCompleto });
   }
 
-  async buscaIdEmbalagemProduto(dimensoes) {
+  async buscaIdEmbalagemProduto({ comprimentoEmbalagem, larguraEmbalagem }) {
     const embalagem = await Embalagem.findOne({
-      where: {
-        comprimento: dimensoes.comprimentoEmbalagem,
-        largura: dimensoes.larguraEmbalagem,
-      },
+      where: { comprimento: comprimentoEmbalagem, largura: larguraEmbalagem },
     });
+    if (!embalagem) return false;
 
-    if (!embalagem) {
-      console.error("Embalagem não encontrada no banco de dados");
-      return false;
-    }
-
-    const embalagemTiny = await this.pegaProdutoPorPesquisa(
-      embalagem.dataValues.codigo
-    );
-
-    const { id: idEmbalagem } = embalagemTiny.retorno.produtos[0].produto;
-
-    if (!idEmbalagem) {
-      console.error("Não foi possivel obter o ID da embalagem");
-    }
-
-    return idEmbalagem;
+    const embalagemTiny = await this.pegaProdutoPorPesquisa(embalagem.codigo);
+    return embalagemTiny?.retorno?.produtos?.[0]?.produto?.id || false;
   }
 
   async PegaEstoquePorId(idProdutoTiny, token) {
-    if (!idProdutoTiny) {
-      console.error("ID do produto não fornecido");
-      return false;
-    }
+    if (!idProdutoTiny) return false;
 
     try {
       const response = await fetch(
@@ -251,16 +204,6 @@ class TinyController extends Controller {
       );
 
       const data = await response.json();
-
-      if (data?.retorno?.status === "Erro") {
-        const erroRegistro =
-          data?.retorno?.registros?.registro?.erros?.[0]?.erro ||
-          data?.retorno?.erros?.[0]?.erro ||
-          "Erro desconhecido";
-
-        throw new Error(`Erro da API Tiny: ${erroRegistro}`);
-      }
-
       return data;
     } catch (error) {
       console.error("Erro em PegaEstoquePorId:", error.message);
@@ -269,120 +212,78 @@ class TinyController extends Controller {
   }
 
   async AtualizaEstoquePorId(idProdutoTiny, pedidoDaNfe) {
-    let token = this.acessToken; // Certifique-se de definir isso no seu serviço
-    const { saldo } = await this.PegaEstoquePorId(idProdutoTiny, token);
-    const depositoId = 731692721;
+    /*   const token = await this.refreshAccessToken(); */
+   /*  const estoque = await this.PegaEstoquePorId(idProdutoTiny, this.token);
+    const saldo = estoque?.produto?.saldo;
+    if (saldo === undefined) return false;
+
+    const quantidadeDeAjuste = saldo > 1 ? saldo - 1 : 1; */
     const dataFormatadaAtual = dateNowConvert();
-    const quantidadeDeAjuste = saldo > 1 ? saldo - 1 : 1;
-    const numeroPedidoTiny = pedidoDaNfe?.retorno?.pedido.numero;
-    const numeroPedidoEcommerce = pedidoDaNfe?.retorno?.pedido.numero_ecommerce;
-    const bodyData = {
-      produto: {
-        id: idProdutoTiny,
+
+    const url = "https://api.tiny.com.br/api2/produto.atualizar.estoque.php";
+
+    const params = new URLSearchParams();
+    params.append("token", this.token);
+    params.append("formato", "XML");
+    params.append(
+      "estoque",
+      ` <estoque>
+          <idProduto>${idProdutoTiny}</idProduto>
+          <tipo>S</tipo>
+          <data>${dataFormatadaAtual}</data>
+          <quantidade>1</quantidade>
+          <precoUnitario>0.80</precoUnitario>
+          <observacoes>Referente ao pedido ${pedidoDaNfe}</observacoes>
+          <deposito>marketplace</deposito>
+        </estoque>
+        `.trim()
+    );
+
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-      deposito: {
-        id: depositoId,
-      },
-      tipo: "S",
-      data: dataFormatadaAtual, // data atual em formato "YYYY-MM-DD"
-      quantidade: quantidadeDeAjuste,
-      precoUnitario: 0.8,
-      observacoes: `Embalagem do pedido ${numeroPedidoTiny} / ${numeroPedidoEcommerce} `,
-    };
-
-    if (saldo === undefined || saldo === null) {
-      console.error("Saldo não retornado pela API");
-      return false;
-    }
-
-    if (!depositoId) {
-      console.error("Deposito para atualização não informado:");
-    }
-
-    if (!idProdutoTiny) {
-      console.error("ID do produto não fornecido");
-      return false;
-    }
-
-    try {
-      const response = await fetch(
-        `${this.API_TINT_URL_V3}/estoque/${idProdutoTiny}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(bodyData),
-        }
-      );
-
-      const data = await response.json();
-
-      if (data?.retorno?.status === "Erro") {
-        const erroRegistro =
-          data?.retorno?.registros?.registro?.erros?.[0]?.erro ||
-          data?.retorno?.erros?.[0]?.erro ||
-          "Erro desconhecido";
-
-        throw new Error(`Erro da API Tiny: ${erroRegistro}`);
-      }
-      console.log("Estoque da embalagem atualizado");
-      return data;
-    } catch (error) {
-      console.error("Erro em AtualizaEstoquePorId:", error.message);
-      return false;
-    }
+      body: params,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Resposta:", JSON.stringify(data, null, 2));
+      })
+      .catch((error) => {
+        console.error("Erro:", error);
+      });
   }
 
-  async iniciarAutenticacao(req, res) {
-    const authUrl = `${this.AUTH_URL}?client_id=${
-      this.clientID
-    }&redirect_uri=${encodeURIComponent(
-      this.redirectUri
-    )}&response_type=code&scope=openid`;
-
+  /*   async iniciarAutenticacao(req, res) {
+    const authUrl = `${this.AUTH_URL}?client_id=${this.clientID}&redirect_uri=${encodeURIComponent(this.redirectUri)}&response_type=code&scope=openid`;
     return res.redirect(authUrl);
   }
 
   async recebeRedirectCode(req, res) {
     const code = req.query.code;
+    if (!code) return res.status(400).json({ error: "Código de autorização não recebido" });
 
-    if (!code) {
-      return res
-        .status(400)
-        .json({ error: "Código de autorização não recebido" });
-    }
-
-    const params = new URLSearchParams();
-    params.append("grant_type", "authorization_code");
-    params.append("code", code);
-    params.append("redirect_uri", this.redirectUri);
-    params.append("client_id", this.clientID);
-    params.append("client_secret", this.secret);
+    const params = new URLSearchParams({
+      grant_type: "authorization_code",
+      code,
+      redirect_uri: this.redirectUri,
+      client_id: this.clientID,
+      client_secret: this.secret,
+    });
 
     try {
       const response = await fetch(this.TOKEN_URL, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: params.toString(),
       });
 
       const data = await response.json();
+      if (!response.ok) return res.status(500).json({ error: data });
 
-      if (!response.ok) {
-        return res.status(500).json({ error: data });
-      }
-
-      // Aqui você salva o access_token no banco, ou em memória, ou no arquivo .env
-
-      this.criaRegistroToken(data);
-
-      return res
-        .status(200)
-        .json({ message: "Token recebido com sucesso", token: data });
+      await this.criaRegistroToken(data);
+      return res.status(200).json({ message: "Token recebido com sucesso", token: data });
     } catch (error) {
       return res.status(500).json({ error: error.message });
     }
@@ -391,20 +292,11 @@ class TinyController extends Controller {
   async criaRegistroToken(data) {
     try {
       const tokenExistente = await this.tinyServices.pegaUltimoToken();
-      console.log(tokenExistente);
       if (tokenExistente) {
-        // Atualiza o registro existente
-        await tokenExistente.update({
-          access_token: data.access_token,
-          refresh_token: data.refresh_token,
-          expires_in: data.expires_in,
-          token_type: data.token_type,
-        });
+        await tokenExistente.update(data);
         return tokenExistente;
       } else {
-        // Cria novo registro
-        const token = await this.tinyServices.criaRegistro(data);
-        return token;
+        return await this.tinyServices.criaRegistro(data);
       }
     } catch (error) {
       console.error("Erro ao criar ou atualizar token:", error.message);
@@ -415,18 +307,14 @@ class TinyController extends Controller {
   async refreshAccessToken() {
     try {
       const tokenRegistro = await this.tinyServices.pegaUltimoToken();
+      if (!tokenRegistro) throw new Error("Nenhum token encontrado no banco de dados.");
 
-      if (!tokenRegistro) {
-        throw new Error("Nenhum token encontrado no banco de dados.");
-      }
-
-      const refreshToken = tokenRegistro.refresh_token;
-
-      const params = new URLSearchParams();
-      params.append("grant_type", "refresh_token");
-      params.append("refresh_token", refreshToken);
-      params.append("client_id", this.clientID);
-      params.append("client_secret", this.secret);
+      const params = new URLSearchParams({
+        grant_type: "refresh_token",
+        refresh_token: tokenRegistro.refresh_token,
+        client_id: this.clientID,
+        client_secret: this.secret,
+      });
 
       const response = await fetch(this.TOKEN_URL, {
         method: "POST",
@@ -435,25 +323,15 @@ class TinyController extends Controller {
       });
 
       const data = await response.json();
+      if (!response.ok) throw new Error(data.error_description || "Erro ao renovar access_token");
 
-      if (!response.ok) {
-        throw new Error(
-          data.error_description || "Erro ao renovar access_token"
-        );
-      }
-
-      // Atualiza o token no banco
-      await this.tinyServices.criaRegistro(data);
-
-      this.acessToken = data.access_token;
-
-      console.log("Novo access token atualizado com sucesso.");
+      await this.criaRegistroToken(data);
       return data.access_token;
     } catch (error) {
       console.error("Erro ao atualizar o token:", error.message);
       return null;
     }
-  }
+  } */
 }
 
 module.exports = TinyController;
