@@ -213,12 +213,13 @@ class TinyController extends Controller {
 
   async AtualizaEstoquePorId(idProdutoTiny, pedidoDaNfe) {
     /*   const token = await this.refreshAccessToken(); */
-   /*  const estoque = await this.PegaEstoquePorId(idProdutoTiny, this.token);
+    /*  const estoque = await this.PegaEstoquePorId(idProdutoTiny, this.token);
     const saldo = estoque?.produto?.saldo;
     if (saldo === undefined) return false;
 
     const quantidadeDeAjuste = saldo > 1 ? saldo - 1 : 1; */
     const dataFormatadaAtual = dateNowConvert();
+    const {numero} = pedidoDaNfe.retorno.pedido;
 
     const url = "https://api.tiny.com.br/api2/produto.atualizar.estoque.php";
 
@@ -233,7 +234,7 @@ class TinyController extends Controller {
           <data>${dataFormatadaAtual}</data>
           <quantidade>1</quantidade>
           <precoUnitario>0.80</precoUnitario>
-          <observacoes>Referente ao pedido ${pedidoDaNfe}</observacoes>
+          <observacoes>Referente ao pedido ${numero}</observacoes>
           <deposito>marketplace</deposito>
         </estoque>
         `.trim()
@@ -246,9 +247,9 @@ class TinyController extends Controller {
       },
       body: params,
     })
-      .then((response) => response.json())
+      .then((response) => response.text())
       .then((data) => {
-        console.log("Resposta:", JSON.stringify(data, null, 2));
+        console.log("Resposta:", data);
       })
       .catch((error) => {
         console.error("Erro:", error);
