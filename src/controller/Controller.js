@@ -105,7 +105,6 @@ class Controller {
   }
 
   
-
   async allowNull(req, res) {
     this.camposVazios = []; // serve para nao acumular valores duplicados na array
 

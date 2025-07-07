@@ -1,34 +1,21 @@
 "use strict";
 const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
-  class UsersEmpresa extends Model {
+  class EmpresaUsuario extends Model {
     static associate(models) {
-   
+      // Associações opcionais se necessário
     }
   }
-  UsersEmpresa.init(
-    {
-      id: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-        autoIncrement: false,
-        primaryKey: true, // Definir como chave primária
-      },
-      nome: {
-        type: DataTypes.STRING
-      },
-      email: {
-        type: DataTypes.STRING
-      },
-      senha: {
-        type: DataTypes.STRING
-      }
-    },
+
+  EmpresaUsuario.init(
+    {},
     {
       sequelize,
-      modelName: "UsersEmpresa", // Nome do modelo com "P" maiúsculo
-      tableName: "usersEmpresa",
+      modelName: "EmpresaUsuario",
+      tableName: "empresaUsuarios",
+      timestamps: true,
     }
   );
-  return UsersEmpresa; // Nome da classe deve coincidir com o modelName
+
+  return EmpresaUsuario;
 };

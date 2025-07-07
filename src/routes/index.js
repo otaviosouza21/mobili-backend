@@ -5,10 +5,9 @@ const markup = require("./markup.js");
 const bodyParser = require("body-parser");
 const produtoPedido = require("./produtoPedido.js");
 const email = require("./functions/email.js");
-const usuarioEmpresa = require("./usuario.js");
-const chatbot = require("./chatbot/chatbot-api.js");
+const climbup = require("./climbup/climbup-routes.js");
 const tiny = require("./tiny/tiny-routes.js");
-
+const cliente = require("./mercos/clientes.js");
 
 module.exports = (app) => {
   app.use(cors());
@@ -18,7 +17,8 @@ module.exports = (app) => {
   app.use(markup);
   app.use(produtoPedido);
   app.use(email);
-  app.use(chatbot);
-  app.use(tiny)
+  app.use(tiny);
+  app.use(climbup);
+  app.use(cliente)
   /*  app.use(usuarioEmpresa); */
 };
