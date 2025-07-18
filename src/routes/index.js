@@ -7,7 +7,7 @@ const produtoPedido = require("./produtoPedido.js");
 const email = require("./functions/email.js");
 const climbup = require("./climbup/climbup-routes.js");
 const tiny = require("./tiny/tiny-routes.js");
-const cliente = require("./mercos/clientes.js");
+const mercos = require("./mercos/mercos-routes.js");
 
 module.exports = (app) => {
   app.use(cors());
@@ -19,6 +19,6 @@ module.exports = (app) => {
   app.use(email);
   app.use(tiny);
   app.use(climbup);
-  app.use(cliente)
+  app.use(mercos)
   /*  app.use(usuarioEmpresa); */
 };

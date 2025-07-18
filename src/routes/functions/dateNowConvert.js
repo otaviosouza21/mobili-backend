@@ -1,4 +1,4 @@
-export function dateNowConvert() {
+export function dateNowConvert(data) {
   const now = new Date();
 
   const year = now.getFullYear();
